@@ -20,7 +20,7 @@ public class Dish {
     private String description; // Ej: "Trozos de carne salteados con cebolla y tomate"
 
     @Column(name = "is_active")
-    private boolean isActive = true; // Para poder "desactivar" un plato en lugar de borrarlo
+    private boolean active = true; // Para poder "desactivar" un plato en lugar de borrarlo
 
     // --- Relaciones ---
     @ManyToOne // Muchos platos pertenecen a UNA categoría

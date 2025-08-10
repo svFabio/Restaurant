@@ -1,44 +1,38 @@
 package com.restaurante.pos.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 1. Creamos el Bean del encriptador de contraseñas
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final AuthenticationProvider authenticationProvider;
 
-    // 2. Creamos el Bean de la cadena de filtros de seguridad
+    // Ya no necesitamos el @Bean de PasswordEncoder aquí, lo tenemos en ApplicationConfig
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Desactivamos la protección CSRF porque usaremos tokens JWT
                 .csrf(csrf -> csrf.disable())
-
-                // Definimos las reglas de autorización para las peticiones HTTP
                 .authorizeHttpRequests(auth -> auth
-                        // Permitimos el acceso público a nuestro futuro endpoint de login
-                        .requestMatchers("/api/auth/login").permitAll()
-                        // Cualquier otra petición requerirá autenticación
+                        .requestMatchers("/api/auth/**").permitAll() // Permitimos todo bajo /api/auth
                         .anyRequest().authenticated()
                 )
-
-                // Configuramos la gestión de sesiones para que sea sin estado (STATELESS)
-                // Esto es clave para una API REST con JWT
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Aquí le decimos a Spring que use nuestro proveedor de autenticación
+                .authenticationProvider(authenticationProvider)
+                // Y aquí añadimos nuestro filtro JWT ANTES del filtro de usuario/contraseña
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

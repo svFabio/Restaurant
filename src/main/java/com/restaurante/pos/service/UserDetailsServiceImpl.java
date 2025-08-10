@@ -1,7 +1,10 @@
+// ESTA ES LA LÍNEA CORRECTA
 package com.restaurante.pos.service;
 
 import com.restaurante.pos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+// Importaciones necesarias
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,11 +21,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Buscamos el usuario en nuestra base de datos usando el repositorio
         com.restaurante.pos.entity.User appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No se encontró el usuario: " + username));
 
-        // Creamos y retornamos el UserDetails que Spring Security entiende
-        return new User(appUser.getUsername(), appUser.getPassword(), Collections.emptyList());
+        // La línea corregida: ahora creamos una lista con el rol del usuario.
+        // Spring Security requiere que los roles empiecen con "ROLE_".
+        return new User(appUser.getUsername(), appUser.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + appUser.getRole())));
     }
 }

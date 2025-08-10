@@ -1,7 +1,7 @@
 package com.restaurante.pos.config;
 
 import com.restaurante.pos.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,31 +9,30 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@RequiredArgsConstructor // Usamos esto para la inyección de dependencias
 public class ApplicationConfig {
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // Bean que provee nuestro UserDetailsService personalizado
+    // ¡AQUÍ ESTÁ LA PIEZA FALTANTE!
+    // Le damos a Spring las instrucciones para crear el PasswordEncoder.
     @Bean
-    public UserDetailsService userDetailsService() {
-        return userDetailsService;
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
+    // Ya no necesitamos el @Bean para UserDetailsService, Spring lo maneja.
+
     // Bean que es el proveedor de autenticación.
-    // Usa nuestro UserDetailsService para encontrar al usuario
-    // y el PasswordEncoder para comparar las contraseñas.
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder);
+        authProvider.setUserDetailsService(userDetailsService); // Inyectamos directamente
+        authProvider.setPasswordEncoder(passwordEncoder()); // Llamamos al método del bean
         return authProvider;
     }
 
