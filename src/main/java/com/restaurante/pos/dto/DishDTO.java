@@ -1,5 +1,5 @@
 package com.restaurante.pos.dto;
-
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,5 +11,6 @@ public class DishDTO {
     private String description;
     private boolean active;
     private Long categoryId; // Usamos el ID para la creación/actualización
+    private BigDecimal price;
     private String categoryName; // Mostramos el nombre para la lectura
 }

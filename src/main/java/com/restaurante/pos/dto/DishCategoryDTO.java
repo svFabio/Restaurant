@@ -1,11 +1,10 @@
 package com.restaurante.pos.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class DishCategoryDTO {
     private Long id;
     private String name;
+    private boolean active;
 }

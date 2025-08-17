@@ -1,27 +1,17 @@
 package com.restaurante.pos.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebConfig {
+public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(@NonNull CorsRegistry registry) {
-                // Esta configuración permite cualquier origen, método y cabecera
-                // para todas las rutas que empiecen con /api/
-                // Es permisiva para el desarrollo, en producción se restringe más.
-                registry.addMapping("/api/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("*")
-                        .allowedHeaders("*");
-            }
-        };
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**") // Permite CORS para todas las rutas bajo /api
+                .allowedOrigins("*")   // Permite cualquier origen (para desarrollo)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Permite estos métodos HTTP
+                .allowedHeaders("*");  // Permite cualquier cabecera
     }
 }

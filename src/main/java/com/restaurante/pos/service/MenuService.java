@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +29,6 @@ public class MenuService {
 
     @Transactional
     public DailyMenuDTO createDailyMenu(CreateDailyMenuDTO createDto) {
-        // Verificamos que no exista ya un menú para esa fecha
         dailyMenuRepository.findByMenuDate(createDto.getMenuDate()).ifPresent(menu -> {
             throw new IllegalStateException("Ya existe un menú para la fecha: " + createDto.getMenuDate());
         });
@@ -43,25 +43,25 @@ public class MenuService {
 
             DailyMenuDish menuDish = new DailyMenuDish();
             menuDish.setDish(dish);
+
             menuDish.setInitialStock(dishDto.getInitialStock());
-            menuDish.setCurrentStock(dishDto.getInitialStock()); // Al crear, el stock actual es el inicial
-            menuDish.setDailyMenu(dailyMenu); // Vinculamos al menú
+            menuDish.setCurrentStock(dishDto.getInitialStock());
+            menuDish.setDailyMenu(dailyMenu);
             menuDishes.add(menuDish);
         }
 
         dailyMenu.setDailyMenuDishes(menuDishes);
         DailyMenu savedMenu = dailyMenuRepository.save(dailyMenu);
-
         return convertToDTO(savedMenu);
     }
 
     @Transactional(readOnly = true)
-    public DailyMenuDTO getMenuByDate(LocalDate date) {
-        DailyMenu menu = dailyMenuRepository.findByMenuDate(date)
-                .orElseThrow(() -> new EntityNotFoundException("No se encontró menú para la fecha: " + date));
-        return convertToDTO(menu);
+    public Optional<DailyMenuDTO> getMenuByDate(LocalDate date) {
+        return dailyMenuRepository.findByMenuDate(date)
+                .map(this::convertToDTO);
     }
 
+    // ÚNICA VERSIÓN CORRECTA DEL MÉTODO
     private DailyMenuDTO convertToDTO(DailyMenu menu) {
         DailyMenuDTO menuDto = new DailyMenuDTO();
         menuDto.setId(menu.getId());
@@ -69,10 +69,13 @@ public class MenuService {
 
         List<DailyMenuDishDTO> dishDtos = menu.getDailyMenuDishes().stream().map(menuDish -> {
             DailyMenuDishDTO dishDto = new DailyMenuDishDTO();
+            dishDto.setId(menuDish.getId()); // <-- La corrección importante
             dishDto.setDishId(menuDish.getDish().getId());
             dishDto.setDishName(menuDish.getDish().getName());
             dishDto.setInitialStock(menuDish.getInitialStock());
             dishDto.setCurrentStock(menuDish.getCurrentStock());
+            dishDto.setPrice(menuDish.getDish().getPrice());
+            dishDto.setCategoryName(menuDish.getDish().getCategory().getName());
             return dishDto;
         }).collect(Collectors.toList());
 

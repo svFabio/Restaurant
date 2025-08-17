@@ -3,6 +3,7 @@ package com.restaurante.pos.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "dishes")
@@ -15,15 +16,27 @@ public class Dish {
     private Long id;
 
     @Column(nullable = false)
-    private String name; // Ej: "Lomo Saltado"
+    private String name;
 
-    private String description; // Ej: "Trozos de carne salteados con cebolla y tomate"
+    @Column(length = 500)
+    private String description;
 
-    @Column(name = "is_active")
-    private boolean active = true; // Para poder "desactivar" un plato en lugar de borrarlo
+    @Column(nullable = false)
+    private boolean active = true; // Corregido: sin comillas
 
-    // --- Relaciones ---
-    @ManyToOne // Muchos platos pertenecen a UNA categoría
-    @JoinColumn(name = "category_id", nullable = false) // La columna que une las tablas
+    @Column(name = "price", nullable = false, precision = 10, scale = 2) // Corregido: sin comillas
+    private BigDecimal price;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
     private DishCategory category;
+
+    // Mantenemos los getters y setters manuales por si acaso
+    public BigDecimal getPrice() {
+        return this.price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 }

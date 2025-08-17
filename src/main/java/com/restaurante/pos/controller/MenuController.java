@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 import java.time.LocalDate;
 
@@ -29,7 +30,12 @@ public class MenuController {
     // Se usará así: GET /api/menus/by-date?date=2025-08-11
     @GetMapping("/by-date")
     public ResponseEntity<DailyMenuDTO> getMenuByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        DailyMenuDTO menu = menuService.getMenuByDate(date);
-        return ResponseEntity.ok(menu);
+        Optional<DailyMenuDTO> menuDtoOptional = menuService.getMenuByDate(date);
+
+        if (menuDtoOptional.isPresent()) {
+            return ResponseEntity.ok(menuDtoOptional.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

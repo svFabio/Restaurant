@@ -1,11 +1,12 @@
 package com.restaurante.pos.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class OrderItemDTO {
-    // El ID del plato en el menú del día (daily_menu_dishes)
+    // ID del plato en el menú del día (para crear el pedido)
     private Long dailyMenuDishId;
+
+    // Nombre del plato (para mostrar en el historial)
+    private String dishName;
 }
